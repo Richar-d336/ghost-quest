@@ -15,24 +15,8 @@
         .question-text { font-size: 1.1rem; line-height: 1.5; margin-bottom: 20px; color: #fff; }
         input[type="text"] { width: 100%; padding: 15px; background: #120b1a; border: 2px solid #ffd700; color: #fff; border-radius: 8px; font-size: 1rem; box-sizing: border-box; outline: none; margin-bottom: 15px; }
         input[type="text"]:focus { border-color: #fff; }
-        
-        /* Стили для текстового поля истории */
-        textarea { 
-            width: 100%; 
-            padding: 15px; 
-            background: #120b1a; 
-            border: 2px solid #ffd700; 
-            color: #fff; 
-            border-radius: 8px; 
-            font-size: 1rem; 
-            box-sizing: border-box; 
-            outline: none; 
-            margin-bottom: 15px; 
-            resize: vertical;
-            min-height: 120px;
-        }
+        textarea { width: 100%; padding: 15px; background: #120b1a; border: 2px solid #ffd700; color: #fff; border-radius: 8px; font-size: 1rem; box-sizing: border-box; outline: none; margin-bottom: 15px; resize: vertical; min-height: 120px; font-family: inherit; }
         textarea:focus { border-color: #fff; }
-
         .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
         .option-btn { padding: 12px; background: #2b213d; color: #fff; border: 1px solid #443355; border-radius: 8px; cursor: pointer; font-size: 0.95rem; transition: all 0.2s; }
         .option-btn:hover { background: #3a2d50; border-color: #ffd700; color: #ffd700; }
@@ -54,8 +38,6 @@
         .stat-ok { color: #4caf50; }
         .stat-fail { color: #f44336; }
         .stat-skip { color: #ffd700; }
-        
-        /* Стили для блока истории */
         .story-block { background: #2b213d; padding: 15px; border-radius: 8px; margin-top: 20px; text-align: left; }
         .story-title { color: #ffd700; margin-bottom: 10px; font-size: 1.1rem; }
     </style>
@@ -66,7 +48,7 @@
     <!-- ЭКРАН 1: ЛОГИН -->
     <div id="screen-login" class="screen active">
         <h1><span style="font-size: 1.2em;">👻</span> Квест Призрака</h1>
-        <p style="color: #aaa; margin-bottom: 20px;">Введи свой логин Стафф, чтобы начать сбор артефактов и войти в статистику.</p>
+        <p style="color: #aaa; margin-bottom: 20px;">Введи свой логин Стафф, чтобы начать сбор артефактов.</p>
         <input type="text" id="staff-login" placeholder="Твой логин Стафф" style="width: 100%; padding: 15px; background: #120b1a; border: 2px solid #ffd700; color: white; border-radius: 8px; font-size: 1.1rem; box-sizing: border-box;">
         <br>
         <button class="check-btn" style="margin-top: 20px; padding: 15px 30px; font-size: 1.1rem;" onclick="startQuest()">Начать квест</button>
@@ -93,7 +75,7 @@
         </div>
     </div>
 
-    <!-- ЭКРАН 3: ФИНАЛ И СТАТИСТИКА -->
+    <!-- ЭКРАН 3: ФИНАЛ -->
     <div id="screen-final" class="screen">
         <h2>🏆 Коллекция собрана!</h2>
         <p>Ты прошел все испытания призрака.</p>
@@ -103,30 +85,21 @@
         <h3>📝 Составь историю</h3>
         <div class="story-block">
             <p class="story-title">Используй собранные артефакты, чтобы написать финальную историю:</p>
-            <textarea id="story-text" placeholder="Напиши свою историю здесь..."></textarea>
+            <textarea id="story-text" placeholder="Напиши свою историю здесь..." style="width: 100%; padding: 15px; background: #120b1a; color: #fff; border: 2px solid #ffd700; border-radius: 8px; box-sizing: border-box; resize: vertical; min-height: 120px;"></textarea>
         </div>
         
         <h3>📊 Твоя статистика прохождения:</h3>
         <div class="stats-report" id="stats-report"></div>
         
-        <button class="check-btn" style="margin-top: 20px;" onclick="sendStats()">Отправить статистику в таблицу</button>
-        <p style="font-size: 0.8rem; color: #4caf50; margin-top: 10px; display: none;" id="stats-status">✅ Данные успешно отправлены в Google Таблицу!</p>
+        <!-- КНОПКА ТЕПЕРЬ ПРОСТО КОПИРУЕТ ДАННЫЕ -->
+        <button id="copy-btn" class="check-btn" style="margin-top: 20px;">Скопировать данные для таблицы</button>
+        
+        <p id="stats-status" style="font-size: 0.8rem; color: #4caf50; margin-top: 10px; display: none;">✅ Данные готовы к вставке!</p>
     </div>
 </div>
 
 <script>
-    // ================= НАСТРОЙКИ (ОБЯЗАТЕЛЬНО ЗАПОЛНИТЬ) =================
-    // 1. Вставь сюда ссылку на форму. 
-    // ВАЖНО: В конце ссылки должно быть /formResponse, а не /viewform
-    const GOOGLE_FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSeW5Mh780IQSVhTh9JM4LmP0bTIE4igWDpJo72KiZIUpyLJqQ/formResponse'; 
-    
-    // 2. Вставь ID полей (цифры после entry.)
-    const FIELD_LOGIN = '1849824770';      
-    const FIELD_ARTIFACTS = '1743809145'; 
-    const FIELD_STORY = '1947918477';    
-    const FIELD_ANSWERS = '1512539036';   
-    // =====================================================================
-
+    // ================= ДАННЫЕ КВЕСТА =================
     const questions = [
         { q: "Я появляюсь, когда солнце уходит за горизонт...", type: 'input', image: 'https://images.unsplash.com/photo-1519681393784-d1202676378c?w=500&q=80', correct: "луна", artifact: "ночью" },
         { q: "В остроконечной шляпе, с метлой в руках...", type: 'buttons', image: 'https://images.unsplash.com/photo-1546493890-d957e790e775?w=500&q=80', options: ["ведьма", "фея", "колдунья"], correct: "ведьма", artifact: "ведьма" },
@@ -153,7 +126,7 @@
     let currentIndex = 0;
     const solvedStatus = []; 
     const collectedArtifacts = []; 
-    const answersLog = []; // История ответов
+    const answersLog = []; 
     let playerLogin = '';
 
     // Элементы DOM
@@ -175,7 +148,8 @@
     
     const elProgress = document.getElementById('progress');
     const elArtifactsOut = document.getElementById('artifacts-output');
-    const elStoryText = document.getElementById('story-text'); // Новое поле
+    const elStoryText = document.getElementById('story-text');
+    const elCopyBtn = document.getElementById('copy-btn');
 
     function startQuest() {
         const loginInput = document.getElementById('staff-login');
@@ -209,7 +183,6 @@
 
         elQText.textContent = q.q;
 
-        // Сброс
         elInput.style.display = 'none';
         elInput.value = '';
         elInput.disabled = false;
@@ -217,7 +190,6 @@
         elOptions.style.display = 'none';
         elOptions.innerHTML = '';
 
-        // Показываем нужное
         if (q.type === 'input') {
             elInput.style.display = 'block';
             elInput.focus();
@@ -237,7 +209,6 @@
         elFeedback.textContent = '';
         elFeedback.className = 'feedback';
 
-        // Навигация
         if (currentIndex === 0) {
             elPrev.classList.add('disabled');
         } else {
@@ -328,13 +299,11 @@
         elFinalScreen.classList.add('active');
         elProgress.style.width = '100%';
         
-        // Вывод артефактов
         elArtifactsOut.innerHTML = collectedArtifacts.map(art => {
             if (art) return `<span class="artifact-tag">${art}</span>`;
             return '';
         }).join('');
 
-        // ГЕНЕРАЦИЯ ПОДРОБНОЙ СТАТИСТИКИ
         let statsHtml = `<div class="stat-item"><strong>Логин:</strong> ${playerLogin}</div>`;
         
         let correctCount = 0;
@@ -358,49 +327,41 @@
         elStatsReport.innerHTML = statsHtml;
     }
 
-    async function sendStats() {
-        if (!playerLogin) {
-            alert("Нет логина!");
-            return;
-        }
+    // --- ГЛАВНАЯ ФИШКА: КОПИРОВАНИЕ ДАННЫХ ---
+    if (elCopyBtn) {
+        elCopyBtn.addEventListener('click', () => {
+            // 1. Собираем все данные
+            const login = playerLogin || 'Не указан';
+            const artifacts = collectedArtifacts.join(', ') || 'Нет артефактов';
+            const story = elStoryText ? elStoryText.value.trim() : 'История не написана';
+            const stats = answersLog.join('\n') || 'Нет статистики';
 
-        const storyValue = elStoryText.value.trim();
-        if (!storyValue) {
-            alert("Пожалуйста, напишите историю в поле ниже!");
-            elStoryText.focus();
-            return;
-        }
+            // 2. Формируем текст для вставки в таблицу
+            // При вставке в Google Таблицу этот текст разобьется на строки
+            const dataToCopy = `
+ЛОГИН: ${login}
+АРТЕФАКТЫ: ${artifacts}
+ИСТОРИЯ: ${story}
+СТАТИСТИКА:
+${stats}
+            `.trim();
 
-        // Проверка настроек
-        if (!GOOGLE_FORM_URL || !FIELD_LOGIN || !FIELD_ARTIFACTS || !FIELD_STORY || !FIELD_ANSWERS) {
-            alert("⚠️ Форма не настроена! Данные не будут сохранены в Google Таблицу. Но статистика видна на экране выше.");
-            elStatsStatus.style.display = 'block';
-            elStatsStatus.style.color = '#ffd700';
-            elStatsStatus.textContent = "⚠️ Демо-режим: данные не отправлены в Google";
-            return;
-        }
-
-        const formData = new FormData();
-        formData.append(FIELD_LOGIN, playerLogin);
-        formData.append(FIELD_ARTIFACTS, collectedArtifacts.join(', '));
-        formData.append(FIELD_STORY, storyValue);
-        formData.append(FIELD_ANSWERS, answersLog.join('\n'));
-
-        try {
-            await fetch(GOOGLE_FORM_URL, {
-                method: 'POST',
-                body: formData
+            // 3. Копируем в буфер обмена
+            navigator.clipboard.writeText(dataToCopy).then(() => {
+                alert('✅ ДАННЫЕ СКОПИРОВАНЫ!\n\n1. Открой свою Google Таблицу.\n2. Поставь курсор в нужную ячейку.\n3. Нажми Ctrl+V (или Cmd+V на Mac).');
+                
+                if(elStatsStatus) {
+                    elStatsStatus.style.display = 'block';
+                    elStatsStatus.textContent = "✅ Данные готовы к вставке!";
+                }
+                
+                elCopyBtn.textContent = "Скопировано!";
+                elCopyBtn.style.backgroundColor = "#4caf50";
+            }).catch(err => {
+                console.error('Ошибка копирования:', err);
+                alert('Не удалось скопировать автоматически. Выдели текст вручную и скопируй.');
             });
-            
-            elStatsStatus.style.display = 'block';
-            elStatsStatus.style.color = '#4caf50';
-            elStatsStatus.textContent = "✅ Данные успешно отправлены в Google Таблицу!";
-        } catch (error) {
-            console.error("Ошибка отправки:", error);
-            elStatsStatus.style.display = 'block';
-            elStatsStatus.style.color = '#f44336';
-            elStatsStatus.textContent = "❌ Ошибка отправки. Проверьте консоль браузера.";
-        }
+        });
     }
 </script>
 
