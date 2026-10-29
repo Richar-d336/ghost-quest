@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Квест Призрака: Статистика</title>
+    <style>
+        body { margin: 0; padding: 0; background-color: #0b0b0b; color: #fff; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; overflow: hidden; }
+        .container { width: 100%; max-width: 550px; background: #1e152b; padding: 20px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); text-align: center; border: 1px solid #332b4a; }
+        h1 { color: #ffd700; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 1.4rem; }
+        .screen { display: none; }
+        .screen.active { display: block; }
+        .question-image-container { width: 100%; height: 180px; margin-bottom: 15px; display: flex; justify-content: center; align-items: center; overflow: hidden; border-radius: 12px; background: #000; }
+        .question-image-container img { max-width: 100%; max-height: 100%; object-fit: contain; display: block; }
+        .question-text { font-size: 1.1rem; line-height: 1.5; margin-bottom: 20px; color: #fff; }
+        input[type="text"] { width: 100%; padding: 15px; background: #120b1a; border: 2px solid #ffd700; color: #fff; border-radius: 8px; font-size: 1rem; box-sizing: border-box; outline: none; margin-bottom: 15px; }
+        input[type="text"]:focus { border-color: #fff; }
+        
+        /* Стили для текстового поля истории */
+        textarea { 
+            width: 100%; 
+            padding: 15px; 
+            background: #120b1a; 
+            border: 2px solid #ffd700; 
+            color: #fff; 
+            border-radius: 8px; 
+            font-size: 1rem; 
+            box-sizing: border-box; 
+            outline: none; 
+            margin-bottom: 15px; 
+            resize: vertical;
+            min-height: 120px;
+        }
+        textarea:focus { border-color: #fff; }
+
+        .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        .option-btn { padding: 12px; background: #2b213d; color: #fff; border: 1px solid #443355; border-radius: 8px; cursor: pointer; font-size: 0.95rem; transition: all 0.2s; }
+        .option-btn:hover { background: #3a2d50; border-color: #ffd700; color: #ffd700; }
+        .controls-row { display: flex; justify-content: space-between; align-items: center; width: 100%; margin-top: 20px; flex-wrap: wrap; gap: 10px; }
+        .nav-btn { padding: 10px 15px; background: transparent; color: #aaa; border: 1px solid #443355; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 1rem; min-width: 100px; text-align: center; transition: all 0.2s; }
+        .nav-btn.disabled { opacity: 0.5; cursor: not-allowed; border-color: #221a33; color: #555; }
+        .nav-btn:not(.disabled):hover { color: #ffd700; border-color: #ffd700; }
+        .check-btn { padding: 12px 25px; background: #ffd700; color: #000; border: none; border-radius: 8px; font-weight: bold; font-size: 1rem; cursor: pointer; transition: transform 0.1s; min-width: 120px; }
+        .check-btn:hover { transform: scale(1.05); }
+        .feedback { margin-top: 15px; font-weight: bold; min-height: 24px; font-size: 1.1rem; text-align: center; line-height: 1.4; }
+        .feedback.correct { color: #4caf50; }
+        .feedback.wrong { color: #f44336; }
+        .progress-bar { width: 100%; height: 6px; background: #332b4a; border-radius: 3px; margin-top: 15px; overflow: hidden; }
+        .progress-fill { height: 100%; background: #ffd700; width: 0%; transition: width 0.5s ease; }
+        .artifacts-list { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 20px; }
+        .artifact-tag { background: rgba(255, 215, 0, 0.2); color: #ffd700; padding: 8px 16px; border-radius: 20px; font-size: 0.9rem; border: 1px solid rgba(255, 215, 0, 0.3); }
+        .stats-report { background: #2b213d; padding: 15px; border-radius: 8px; text-align: left; margin-top: 15px; font-size: 0.85rem; color: #aaa; max-height: 300px; overflow-y: auto; }
+        .stat-item { margin-bottom: 5px; border-bottom: 1px solid #332b4a; padding-bottom: 3px; }
+        .stat-ok { color: #4caf50; }
+        .stat-fail { color: #f44336; }
+        .stat-skip { color: #ffd700; }
+        
+        /* Стили для блока истории */
+        .story-block { background: #2b213d; padding: 15px; border-radius: 8px; margin-top: 20px; text-align: left; }
+        .story-title { color: #ffd700; margin-bottom: 10px; font-size: 1.1rem; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- ЭКРАН 1: ЛОГИН -->
+    <div id="screen-login" class="screen active">
+        <h1><span style="font-size: 1.2em;">👻</span> Квест Призрака</h1>
+        <p style="color: #aaa; margin-bottom: 20px;">Введи свой логин Стафф, чтобы начать сбор артефактов и войти в статистику.</p>
+        <input type="text" id="staff-login" placeholder="Твой логин Стафф" style="width: 100%; padding: 15px; background: #120b1a; border: 2px solid #ffd700; color: white; border-radius: 8px; font-size: 1.1rem; box-sizing: border-box;">
+        <br>
+        <button class="check-btn" style="margin-top: 20px; padding: 15px 30px; font-size: 1.1rem;" onclick="startQuest()">Начать квест</button>
+    </div>
+
+    <!-- ЭКРАН 2: КВЕСТ -->
+    <div id="screen-quiz" class="screen">
+        <div class="question-image-container" id="q-image-box"></div>
+        <div class="question-text" id="question">Загрузка...</div>
+        
+        <input type="text" id="answer-input" placeholder="Введите ответ..." autocomplete="off" style="display: none;">
+        <div class="options-grid" id="options-container" style="display: none;"></div>
+        
+        <div class="feedback" id="feedback"></div>
+
+        <div class="controls-row">
+            <button class="nav-btn" id="btn-prev" onclick="prevQuestion()">← Назад</button>
+            <button class="check-btn" id="btn-check" onclick="checkAnswer()">Проверить</button>
+            <button class="nav-btn" id="btn-next" onclick="nextQuestion()">Вперёд →</button>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress-fill" id="progress"></div>
+        </div>
+    </div>
+
+    <!-- ЭКРАН 3: ФИНАЛ И СТАТИСТИКА -->
+    <div id="screen-final" class="screen">
+        <h2>🏆 Коллекция собрана!</h2>
+        <p>Ты прошел все испытания призрака.</p>
+        
+        <div class="artifacts-list" id="artifacts-output"></div>
+        
+        <h3>📝 Составь историю</h3>
+        <div class="story-block">
+            <p class="story-title">Используй собранные артефакты, чтобы написать финальную историю:</p>
+            <textarea id="story-text" placeholder="Напиши свою историю здесь..."></textarea>
+        </div>
+        
+        <h3>📊 Твоя статистика прохождения:</h3>
+        <div class="stats-report" id="stats-report"></div>
+        
+        <button class="check-btn" style="margin-top: 20px;" onclick="sendStats()">Отправить статистику в таблицу</button>
+        <p style="font-size: 0.8rem; color: #4caf50; margin-top: 10px; display: none;" id="stats-status">✅ Данные успешно отправлены в Google Таблицу!</p>
+    </div>
+</div>
+
+<script>
+    // ================= НАСТРОЙКИ (ОБЯЗАТЕЛЬНО ЗАПОЛНИТЬ) =================
+    // 1. Вставь сюда ссылку на форму. 
+    // ВАЖНО: В конце ссылки должно быть /formResponse, а не /viewform
+    const GOOGLE_FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSeW5Mh780IQSVhTh9JM4LmP0bTIE4igWDpJo72KiZIUpyLJqQ/formResponse'; 
+    
+    // 2. Вставь ID полей (цифры после entry.)
+    const FIELD_LOGIN = '1849824770';      
+    const FIELD_ARTIFACTS = '1743809145'; 
+    const FIELD_STORY = '1947918477';    
+    const FIELD_ANSWERS = '1512539036';   
+    // =====================================================================
+
+    const questions = [
+        { q: "Я появляюсь, когда солнце уходит за горизонт...", type: 'input', image: 'https://images.unsplash.com/photo-1519681393784-d1202676378c?w=500&q=80', correct: "луна", artifact: "ночью" },
+        { q: "В остроконечной шляпе, с метлой в руках...", type: 'buttons', image: 'https://images.unsplash.com/photo-1546493890-d957e790e775?w=500&q=80', options: ["ведьма", "фея", "колдунья"], correct: "ведьма", artifact: "ведьма" },
+        { q: "Злой колдун перепутал буквы: А У К Р А Л...", type: 'input', image: 'https://images.unsplash.com/photo-1516822752139-e298a7ddf55d?w=500&q=80', correct: "украл", artifact: "украла" },
+        { q: "Я прохожу сквозь стены, но не могу пройти сквозь страх...", type: 'buttons', image: 'https://images.unsplash.com/photo-1542144449380-c8d10d6a22e7?w=500&q=80', options: ["призрак", "тень", "дух"], correct: "призрак", artifact: "призрака" },
+        { q: "На стене: «Открой дверь, если ты не боишься. ___ помни...»", type: 'buttons', image: 'https://images.unsplash.com/photo-1502602898657-3e9176024c36?w=500&q=80', options: ["и", "но", "хотя"], correct: "но", artifact: "но" },
+        { q: "Я поглощаю свет, меня считают цветом ночи...", type: 'input', image: 'https://images.unsplash.com/photo-1542038813906-b145b067b9e0?w=500&q=80', correct: "чёрный", artifact: "чёрный" },
+        { q: "У меня четыре лапы, я вижу в темноте...", type: 'buttons', image: 'https://images.unsplash.com/photo-1514888281972-fbd7c774374e?w=500&q=80', options: ["кот", "собака", "сова"], correct: "кот", artifact: "кот" },
+        { q: "Перед вами фраза: «Колдун открыл сундук ___ ключом»...", type: 'input', image: 'https://images.unsplash.com/photo-1506744038136-46274300047b?w=500&q=80', correct: "золотым", artifact: "золотым" },
+        { q: "У меня есть зубцы, но я не кусаюсь...", type: 'input', image: 'https://images.unsplash.com/photo-1519681393784-d1202676378c?w=500&q=80', correct: "ключ", artifact: "ключом" },
+        { q: "Закончи предложение: «...повернул ключ...»", type: 'buttons', image: 'https://images.unsplash.com/photo-1506744038136-46274300047b?w=500&q=80', options: ["закрыл", "открыл", "сломал"], correct: "открыл", artifact: "открыл" },
+        { q: "У меня есть крышка, но я не книга...", type: 'input', image: 'https://images.unsplash.com/photo-1506744038136-46274300047b?w=500&q=80', correct: "сундук", artifact: "сундук" },
+        { q: "Ведьма собрала тыкву, свечу ___ книгу...", type: 'buttons', image: 'https://images.unsplash.com/photo-1542144449380-c8d10d6a22e7?w=500&q=80', options: ["но", "и", "или"], correct: "и", artifact: "и" },
+        { q: "Дух был заперт в магическом круге...", type: 'input', image: 'https://images.unsplash.com/photo-1542038813906-3e9176024c36?w=500&q=80', correct: "освободил", artifact: "освободил" },
+        { q: "Я не живой, но могу бродить по ночам...", type: 'buttons', image: 'https://images.unsplash.com/photo-1542144449380-c8d10d6a22e7?w=500&q=80', options: ["призрак", "зомби", "оборотень"], correct: "призрак", artifact: "ночью" },
+        { q: "Вопрос 15 (заготовка)", type: 'input', image: '', correct: "ответ", artifact: "арт15" },
+        { q: "Вопрос 16 (заготовка)", type: 'buttons', image: '', options: ["А", "Б", "В"], correct: "а", artifact: "арт16" },
+        { q: "Вопрос 17 (заготовка)", type: 'input', image: '', correct: "ответ", artifact: "арт17" },
+        { q: "Вопрос 18 (заготовка)", type: 'buttons', image: '', options: ["1", "2", "3"], correct: "2", artifact: "арт18" },
+        { q: "Вопрос 19 (заготовка)", type: 'input', image: '', correct: "ответ", artifact: "арт19" },
+        { q: "Вопрос 20 (заготовка)", type: 'buttons', image: '', options: ["Первый", "Второй", "Третий"], correct: "второй", artifact: "арт20" }
+    ];
+
+    let currentIndex = 0;
+    const solvedStatus = []; 
+    const collectedArtifacts = []; 
+    const answersLog = []; // История ответов
+    let playerLogin = '';
+
+    // Элементы DOM
+    const elLoginScreen = document.getElementById('screen-login');
+    const elQuizScreen = document.getElementById('screen-quiz');
+    const elFinalScreen = document.getElementById('screen-final');
+    const elStatsReport = document.getElementById('stats-report');
+    const elStatsStatus = document.getElementById('stats-status');
+    
+    const elQText = document.getElementById('question');
+    const elImgBox = document.getElementById('q-image-box');
+    const elInput = document.getElementById('answer-input');
+    const elOptions = document.getElementById('options-container');
+    const elFeedback = document.getElementById('feedback');
+    
+    const elPrev = document.getElementById('btn-prev');
+    const elCheck = document.getElementById('btn-check');
+    const elNext = document.getElementById('btn-next');
+    
+    const elProgress = document.getElementById('progress');
+    const elArtifactsOut = document.getElementById('artifacts-output');
+    const elStoryText = document.getElementById('story-text'); // Новое поле
+
+    function startQuest() {
+        const loginInput = document.getElementById('staff-login');
+        playerLogin = loginInput.value.trim();
+
+        if (!playerLogin) {
+            alert("Пожалуйста, введите логин!");
+            return;
+        }
+
+        elLoginScreen.classList.remove('active');
+        elQuizScreen.classList.add('active');
+        loadQuestion();
+    }
+
+    function loadQuestion() {
+        if (currentIndex >= questions.length) {
+            showFinal();
+            return;
+        }
+
+        const q = questions[currentIndex];
+
+        elImgBox.innerHTML = '';
+        if (q.image) {
+            const img = document.createElement('img');
+            img.src = q.image;
+            img.alt = 'Иллюстрация';
+            elImgBox.appendChild(img);
+        }
+
+        elQText.textContent = q.q;
+
+        // Сброс
+        elInput.style.display = 'none';
+        elInput.value = '';
+        elInput.disabled = false;
+        
+        elOptions.style.display = 'none';
+        elOptions.innerHTML = '';
+
+        // Показываем нужное
+        if (q.type === 'input') {
+            elInput.style.display = 'block';
+            elInput.focus();
+            elCheck.style.display = 'inline-block';
+        } else if (q.type === 'buttons') {
+            elOptions.style.display = 'grid';
+            q.options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.textContent = opt;
+                btn.onclick = () => selectOption(opt);
+                elOptions.appendChild(btn);
+            });
+            elCheck.style.display = 'none';
+        }
+
+        elFeedback.textContent = '';
+        elFeedback.className = 'feedback';
+
+        // Навигация
+        if (currentIndex === 0) {
+            elPrev.classList.add('disabled');
+        } else {
+            elPrev.classList.remove('disabled');
+        }
+
+        if (currentIndex === questions.length - 1) {
+            elNext.classList.add('disabled');
+        } else {
+            elNext.classList.remove('disabled');
+        }
+
+        if (solvedStatus[currentIndex]) {
+            elFeedback.textContent = '✅ Верно! Ты получил артефакт: "' + collectedArtifacts[currentIndex] + '"';
+            elFeedback.className = 'feedback correct';
+        }
+
+        const percent = ((currentIndex) / questions.length) * 100;
+        elProgress.style.width = percent + '%';
+    }
+
+    function checkAnswer() {
+        const userAns = elInput.value.trim().toLowerCase();
+        const correctAns = questions[currentIndex].correct.toLowerCase();
+        const artifact = questions[currentIndex].artifact;
+        const qNum = currentIndex + 1;
+
+        let logText = `Вопрос ${qNum}: Ответ '${userAns}'`;
+
+        if (userAns === correctAns) {
+            success(artifact, logText + " (Верно)");
+        } else {
+            fail(logText + " (Неверно)");
+        }
+    }
+
+    function selectOption(selected) {
+        const correctAns = questions[currentIndex].correct.toLowerCase();
+        const artifact = questions[currentIndex].artifact;
+        const qNum = currentIndex + 1;
+
+        let logText = `Вопрос ${qNum}: Выбрано '${selected}'`;
+
+        if (selected.toLowerCase() === correctAns) {
+            success(artifact, logText + " (Верно)");
+        } else {
+            fail(logText + " (Неверно)");
+        }
+    }
+
+    function success(artifact, logEntry) {
+        solvedStatus[currentIndex] = true;
+        collectedArtifacts[currentIndex] = artifact;
+        answersLog.push(logEntry);
+        
+        elFeedback.textContent = '✅ Верно! Ты получил артефакт: "' + artifact + '"';
+        elFeedback.className = 'feedback correct';
+        
+        elInput.disabled = true;
+        loadQuestion();
+    }
+
+    function fail(logEntry) {
+        answersLog.push(logEntry);
+        elFeedback.textContent = '❌ Неверно, попробуй еще раз!';
+        elFeedback.className = 'feedback wrong';
+        elInput.focus();
+    }
+
+    function nextQuestion() {
+        if (currentIndex < questions.length - 1) {
+            currentIndex++;
+            loadQuestion();
+        } else {
+            showFinal();
+        }
+    }
+
+    function prevQuestion() {
+        if (currentIndex > 0) {
+            currentIndex--;
+            loadQuestion();
+        }
+    }
+
+    function showFinal() {
+        elQuizScreen.classList.remove('active');
+        elFinalScreen.classList.add('active');
+        elProgress.style.width = '100%';
+        
+        // Вывод артефактов
+        elArtifactsOut.innerHTML = collectedArtifacts.map(art => {
+            if (art) return `<span class="artifact-tag">${art}</span>`;
+            return '';
+        }).join('');
+
+        // ГЕНЕРАЦИЯ ПОДРОБНОЙ СТАТИСТИКИ
+        let statsHtml = `<div class="stat-item"><strong>Логин:</strong> ${playerLogin}</div>`;
+        
+        let correctCount = 0;
+        answersLog.forEach((entry, index) => {
+            let statusClass = '';
+            if (entry.includes("Верно")) {
+                statusClass = "stat-ok";
+                correctCount++;
+            } else if (entry.includes("Неверно")) {
+                statusClass = "stat-fail";
+            } else {
+                statusClass = "stat-skip";
+            }
+            statsHtml += `<div class="stat-item ${statusClass}">${entry}</div>`;
+        });
+
+        statsHtml += `<div class="stat-item" style="margin-top: 10px; border-top: 2px solid #ffd700; padding-top: 5px;">`;
+        statsHtml += `<strong>Итого:</strong> Решено: ${correctCount}, Ошибок: ${answersLog.length - correctCount}`;
+        statsHtml += `</div>`;
+
+        elStatsReport.innerHTML = statsHtml;
+    }
+
+    async function sendStats() {
+        if (!playerLogin) {
+            alert("Нет логина!");
+            return;
+        }
+
+        const storyValue = elStoryText.value.trim();
+        if (!storyValue) {
+            alert("Пожалуйста, напишите историю в поле ниже!");
+            elStoryText.focus();
+            return;
+        }
+
+        // Проверка настроек
+        if (!GOOGLE_FORM_URL || !FIELD_LOGIN || !FIELD_ARTIFACTS || !FIELD_STORY || !FIELD_ANSWERS) {
+            alert("⚠️ Форма не настроена! Данные не будут сохранены в Google Таблицу. Но статистика видна на экране выше.");
+            elStatsStatus.style.display = 'block';
+            elStatsStatus.style.color = '#ffd700';
+            elStatsStatus.textContent = "⚠️ Демо-режим: данные не отправлены в Google";
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append(FIELD_LOGIN, playerLogin);
+        formData.append(FIELD_ARTIFACTS, collectedArtifacts.join(', '));
+        formData.append(FIELD_STORY, storyValue);
+        formData.append(FIELD_ANSWERS, answersLog.join('\n'));
+
+        try {
+            await fetch(GOOGLE_FORM_URL, {
+                method: 'POST',
+                body: formData
+            });
+            
+            elStatsStatus.style.display = 'block';
+            elStatsStatus.style.color = '#4caf50';
+            elStatsStatus.textContent = "✅ Данные успешно отправлены в Google Таблицу!";
+        } catch (error) {
+            console.error("Ошибка отправки:", error);
+            elStatsStatus.style.display = 'block';
+            elStatsStatus.style.color = '#f44336';
+            elStatsStatus.textContent = "❌ Ошибка отправки. Проверьте консоль браузера.";
+        }
+    }
+</script>
+
+</body>
+</html>
