@@ -125,6 +125,42 @@
             cursor: pointer; font-size: .85rem;
         }
         .restart-btn:hover { color: #ffd700; border-color: #ffd700; }
+
+        /* Пояснение правил на стартовом экране */
+        .login-explainer {
+            background: #120b1a; border: 1px solid #443355;
+            border-radius: 10px; padding: 14px; margin: 16px 0;
+            text-align: left;
+        }
+        .login-explainer h2 {
+            color: #ffd700; font-size: 1.02rem; margin: 0 0 9px;
+        }
+        .login-explainer p {
+            color: #d2c9dc; font-size: .9rem; line-height: 1.45;
+            margin: 0 0 11px;
+        }
+        .artifact-examples { display: grid; gap: 8px; margin: 10px 0 12px; }
+        .artifact-example {
+            display: flex; align-items: center; flex-wrap: wrap; gap: 8px;
+            font-size: .88rem; color: #d2c9dc;
+        }
+        .example-chip {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 6px 10px; border-radius: 18px; font-size: .85rem;
+            font-weight: 600; white-space: nowrap;
+        }
+        .example-chip.found {
+            color: #7ee58f; background: rgba(76,175,80,.12);
+            border: 1px solid rgba(76,175,80,.5);
+        }
+        .example-chip.empty-slot {
+            width: 112px; height: 31px; padding: 0;
+            background: transparent; border: 1px dashed #71657d;
+        }
+        .login-explainer .final-note {
+            margin: 12px 0 0; padding-top: 10px;
+            border-top: 1px solid #332b4a; color: #ffdca0;
+        }
         .hint { font-size: .85rem; line-height: 1.45; color: #aaa; margin-top: 10px; }
         @media (max-width: 420px) {
             body { padding: 10px; }
@@ -140,7 +176,26 @@
     <!-- ЭКРАН 1: ЛОГИН -->
     <div id="screen-login" class="screen active">
         <h1><span style="font-size: 1.2em;">👻</span> Квест Призрака</h1>
-        <p style="color: #aaa; margin-bottom: 20px;">Введи свой логин Стафф, чтобы начать сбор артефактов.</p>
+        <p style="color: #aaa; margin-bottom: 16px;">Введи свой логин Стафф, чтобы начать сбор артефактов.</p>
+
+        <div class="login-explainer">
+            <h2>🧿 Как работает коллекция артефактов?</h2>
+            <p>Отвечай на вопросы и собирай артефакты. За правильный ответ ты получишь новый элемент коллекции. Если ответ неверный, артефакт не появляется: место остаётся пустым, без названия и подсказки. Можно подумать и попробовать ответить ещё раз.</p>
+
+            <div class="artifact-examples">
+                <div class="artifact-example">
+                    <span class="example-chip found">✓ НОЧЬЮ</span>
+                    <span>Правильный ответ — артефакт добавлен в коллекцию.</span>
+                </div>
+                <div class="artifact-example">
+                    <span class="example-chip empty-slot" aria-label="Пустое место"></span>
+                    <span>Неверный ответ — артефакт не появляется, поле остаётся пустым.</span>
+                </div>
+            </div>
+
+            <p class="final-note">🏆 В конце квеста ты увидишь только те артефакты, которые собрал, и сможешь использовать их для своей истории. С финальной страницы можно вернуться к вопросам и попробовать получить остальные.</p>
+        </div>
+
         <input type="text" id="staff-login" placeholder="Твой логин Стафф" autocomplete="username" maxlength="100">
         <button class="check-btn" style="margin-top: 5px; padding: 15px 30px; font-size: 1.1rem;" id="start-btn">Начать квест</button>
     </div>
@@ -239,7 +294,7 @@ const questions = [
 	{ q: "Две чёрные пуговицы, маленькая потайная дверь и девочка с синими волосами. Как зовут главную героиню из мультфильма?", type: 'input', image: './images/8B0KOgx.webp', correct: "Коралина", artifact: "пуговицы" },
     { q: "Как называется семейство, с которым связаны образы на фотографии?", type: 'input', image: './images/1DQtrqP.webp', correct: "Аддамс", artifact: "рука" },
     { q: "🧛‍♂️🏰🩸 Какой фильм скрыт в этих эмоджи? ", type: 'input', image: './images/frenjRn.webp', correct: "дракула", artifact: "дракула" },
-    { q: "Вы видите фото-кадр мультфильма. Что это за мультфильм?", type: 'input', image: './images/9RUiMy7.webp', correct: "скубиду", artifact: "машина" },
+    { q: "Вы видите фото-кадр мультфильма. Что это за мультфильм?", type: 'input', image: './images/9RUiMy7.webp', correct: "скубиду", artifact: "арт17" },
     { q: "Как называется растение, которое защищает людей от вампирского внушения?", type: 'buttons', image: './images/7c9exdI.webp', options: ["Аконит", "Вербена", "Лаванда"], correct: "Вербена", artifact: "Цветок" },
     { q: "Вы видите три описания несуществующих фильмов ужасов и одно — реального. Нужно вычислить настоящий сюжет, какой из этих фильмов действительно существует?", type: 'buttons', image: './images/zsUwMOC.webp', options: ["Девочка находит в зеркале двойника, который стареет вместо неё", "Семья переезжает в дом, где каждую ночь появляется ещё одна дверь", "Клоун живёт в канализации и охотится на детей в городе Дерри", "В заброшенном кинотеатре показывают фильмы о будущей смерти зрителей"], correct: "Клоун живёт в канализации и охотится на детей в городе Дерри", artifact: "паутина" },
 	{ q: "Перед Вами тёмный лабиринт, до выхода подать рукой, но какой из них верный?", type: 'input', image: './images/5uZLawF.webp', correct: "звезда", artifact: "звезда" },
